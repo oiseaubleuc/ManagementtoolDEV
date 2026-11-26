@@ -1,72 +1,111 @@
-# Laravel Workflow Management Tool
+<h1 align="center">Workflow Management Tool</h1>
+<p align="center">
+  <b>Project and time-tracking platform with role-based access control</b><br/>
+  Track time per project and task, separate billable hours, and control who sees what with roles, permissions and policies.
+</p>
 
-Workflow- en tijdregistratie-applicatie met Laravel, Tailwind CSS en Blade.
+<p align="center">
+  <img src="https://img.shields.io/badge/Laravel-13-FF2D20?style=flat-square&logo=laravel&logoColor=white" />
+  <img src="https://img.shields.io/badge/PHP-8.3-777BB4?style=flat-square&logo=php&logoColor=white" />
+  <img src="https://img.shields.io/badge/Blade-templates-F05340?style=flat-square" />
+  <img src="https://img.shields.io/badge/Tailwind-CSS-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white" />
+  <img src="https://img.shields.io/badge/Vite-assets-646CFF?style=flat-square&logo=vite&logoColor=white" />
+  <img src="https://img.shields.io/badge/PHPUnit-12-366488?style=flat-square" />
+</p>
 
-## Functionaliteit
+---
 
-- **Database**: Rollen, rechten, projecten, taken, tijdregistraties
-- **Tijdregistratie**: Koppeling aan project/taak, start/einde, beschrijving, factureerbaar
-- **Front-end**: Blade-templates met Tailwind CSS (Breeze)
-- **Autorisatie**: Middleware (`role`, `permission`) en Policies (Project, TimeEntry)
-- **Gebruikersrechten**: Rollen (admin, manager, member) met permissions
+## Features
 
-## Vereisten
+- **Projects** — full CRUD, each project with its own tasks.
+- **Time tracking** — log time against a project and task with start, end, description and a *billable* flag; stop a running timer in one click.
+- **Dashboard** — number of projects and total time logged this week.
+- **Authentication** — registration, login, email verification and profile management (Laravel Breeze).
+- **Role-based access control** — roles, granular permissions, custom middleware and model policies.
+- **Localization** — French translation included (`lang/fr.json`).
 
-- PHP 8.2+
-- Composer
-- Node.js & npm (voor assets)
-- SQLite (standaard) of MySQL/PostgreSQL
+## Roles and permissions
 
-## Installatie
+| Role | Access |
+|---|---|
+| **admin** | Everything |
+| **manager** | Manage projects and all time entries (view, edit, delete) |
+| **member** | View projects, create and view own time entries |
+
+New users are assigned the **member** role on registration.
+
+Access is enforced on three levels:
+
+| Layer | Implementation |
+|---|---|
+| Routes | `role` and `permission` middleware (`EnsureUserHasRole`, `EnsureUserHasPermission`) |
+| Models | `ProjectPolicy`, `TimeEntryPolicy` |
+| Data | `roles`, `permissions` and `role_user` tables, seeded by `RolePermissionSeeder` |
+
+## Data model
+
+```
+User ──< role_user >── Role ──< Permission
+  │
+  ├──< Project ──< Task
+  │        │
+  └──< TimeEntry >──┘   (project, task, started_at, ended_at, duration, billable)
+```
+
+## Tech stack
+
+| Layer | Technology |
+|---|---|
+| Backend | Laravel 13, PHP 8.3 |
+| Frontend | Blade, Tailwind CSS, Vite |
+| Auth | Laravel Breeze |
+| Database | SQLite by default (MySQL / PostgreSQL supported) |
+| Testing | PHPUnit 12 |
+
+## Getting started
+
+Requirements: PHP 8.3+, Composer, Node.js and npm.
 
 ```bash
-# Dependencies
+git clone https://github.com/oiseaubleuc/ManagementtoolDEV.git
+cd ManagementtoolDEV
+
 composer install
 npm install
 
-# Environment
 cp .env.example .env
 php artisan key:generate
 
-# Database (SQLite standaard)
 touch database/database.sqlite
-php artisan migrate
-php artisan db:seed
+php artisan migrate --seed
 
-# Assets
 npm run build
 ```
 
-## Development
+Run the app:
 
 ```bash
-php artisan serve
-# In een tweede terminal:
-npm run dev
+php artisan serve      # http://localhost:8000
+npm run dev            # in a second terminal, for hot reload
 ```
 
-Bezoek http://localhost:8000. Registreer een account; nieuwe gebruikers krijgen automatisch de rol **Lid** (member).
+**Demo account** (created by the seeder): `admin@example.com` / `password`
 
-## Rollen en rechten (na seeding)
+## Routes
 
-| Rol      | Rechten |
-|----------|---------|
-| **admin** | Alle rechten |
-| **manager** | Projecten en tijdregistraties beheren, alle entries bekijken/bewerken/verwijderen |
-| **member** | Projecten bekijken, eigen tijdregistraties aanmaken en bekijken |
+| Route | Description |
+|---|---|
+| `/dashboard` | Overview and weekly time |
+| `/projects` | Project management |
+| `/time-entries` | Time tracking: list, create, edit, stop, delete |
+| `/profile` | Account settings |
 
-Rollen wijzen: na registratie handmatig in de database (bijv. `role_user` tabel) of via een admin-interface.
+## Tests
 
-## Structuur
+```bash
+php artisan test
+```
 
-- **Migraties**: `database/migrations/2025_03_18_*` (roles, permissions, projects, tasks, time_entries)
-- **Modellen**: `App\Models\{User, Role, Permission, Project, Task, TimeEntry}`
-- **Middleware**: `EnsureUserHasRole`, `EnsureUserHasPermission` (alias: `role`, `permission`)
-- **Policies**: `ProjectPolicy`, `TimeEntryPolicy`
-- **Controllers**: `ProjectController`, `TimeEntryController`
+---
 
-## Routes (na inloggen)
-
-- `/dashboard` – overzicht en snelkoppelingen
-- `/projects` – projecten (CRUD)
-- `/time-entries` – tijdregistratie (index, create, edit, stop, destroy)
+<p align="center">Built by <a href="https://github.com/oiseaubleuc">Hoho</a> · Belgium</p>
